@@ -1,47 +1,63 @@
-FROM debian:9
+FROM centos:latest
 
-RUN apt-get update \
-    && apt-get install -y \
-        wget \
-        procps \
+RUN yum -y update
+RUN yum -y install \
         curl \
         git \
         python \
-        build-essential \
-        xvfb \
-        apt-transport-https \
-        unzip \
-        gettext-base \
-        socat \
-    && wget -qO- https://deb.nodesource.com/setup_8.x | bash \
-    && apt-get install -y nodejs \
-    && rm -rf /var/lib/apt/lists/*
+        make \
+        automake \
+        gcc \
+        gcc-c++ \
+        kernel-devel \
+        xorg-x11-server-Xvfb \
+        git-core
 
-RUN npm install -g yarn 
+RUN yum -y install epel-release yum-utils
+RUN yum -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+RUN yum-config-manager --enable remi
+RUN yum install -y redis
 
-# install LL app
+RUN curl --silent --location https://rpm.nodesource.com/setup_8.x | bash -
+RUN yum install -y nodejs
+
+RUN npm install -g yarn
+RUN npm install -g pm2
+RUN pm2 install pm2-logrotate
+RUN pm2 set pm2-logrotate:compress true
+
 ENV LL_TAG=v2.8.2
 RUN git clone https://github.com/LearningLocker/learninglocker.git /opt/learninglocker \
     && cd /opt/learninglocker \
-    && git checkout $LL_TAG \
-    && yarn install \
-    && yarn build-all
+    && git checkout $LL_TAG
 
 WORKDIR /opt/learninglocker
 
-# make a copy of the origin storage directory that will be used in entrypoint-common.sh
-# to fill up a volume mounted here, if it's empty
+COPY .env .env
+
+#RUN yarn install \
+#    && yarn build-all
+
+
 RUN cp -r storage storage.template
 
-# service api exposes port 8080
-# service ui exposes port 3000
-# see env.template
 EXPOSE 3000 8080
 
-COPY env.template .env.template
-COPY entrypoint-common.sh entrypoint-common.sh
-COPY entrypoint-ui.sh entrypoint-ui.sh
+RUN yarn migrate
 
-ENTRYPOINT ["./entrypoint-common.sh"]
+RUN pm2 start pm2/all.json
+RUN pm2 startup
+RUN pm2 status
+
+RUN node cli/dist/server createSiteAdmin "example@example.ru" "Example" "Qwerty123"
+
+RUN yum -y install nginx
+
+RUN mkdir /etc/nginx/sites-available
+RUN mkdir /etc/nginx/sites-enabled
+COPY learninglocker.conf /etc/nginx/sites-available/learninglocker.conf
+COPY nginx.conf /etc/nginx/nginx.conf
+RUN ln -s /etc/nginx/sites-available/learninglocker.conf /etc/nginx/sites-enabled/learninglocker.conf
+
 
 CMD ["/usr/sbin/init"]
