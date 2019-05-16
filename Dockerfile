@@ -24,7 +24,6 @@ RUN yum install -y nodejs
 RUN npm install -g yarn
 RUN npm install -g pm2
 RUN pm2 install pm2-logrotate
-#RUN pm2 set pm2-logrotate:compress true
 
 ENV LL_TAG=v2.8.2
 RUN git clone https://github.com/LearningLocker/learninglocker.git /opt/learninglocker \
@@ -59,5 +58,6 @@ COPY learninglocker.conf /etc/nginx/sites-available/learninglocker.conf
 COPY nginx.conf /etc/nginx/nginx.conf
 RUN ln -s /etc/nginx/sites-available/learninglocker.conf /etc/nginx/sites-enabled/learninglocker.conf
 
-
+RUN pm2 start pm2/all.json
+RUN pm2 restart all
 CMD ["/usr/sbin/init"]
