@@ -24,7 +24,7 @@ RUN yum install -y nodejs
 RUN npm install -g yarn
 RUN npm install -g pm2
 RUN pm2 install pm2-logrotate
-RUN pm2 set pm2-logrotate:compress true
+#RUN pm2 set pm2-logrotate:compress true
 
 ENV LL_TAG=v2.8.2
 RUN git clone https://github.com/LearningLocker/learninglocker.git /opt/learninglocker \
