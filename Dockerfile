@@ -35,8 +35,8 @@ WORKDIR /opt/learninglocker
 
 COPY .env .env
 
-#RUN yarn install \
-#    && yarn build-all
+RUN yarn install \
+    && yarn build-all
 
 
 RUN cp -r storage storage.template
