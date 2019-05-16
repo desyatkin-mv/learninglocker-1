@@ -44,3 +44,4 @@ COPY entrypoint-ui.sh entrypoint-ui.sh
 
 ENTRYPOINT ["./entrypoint-common.sh"]
 
+CMD ["/usr/sbin/init"]
