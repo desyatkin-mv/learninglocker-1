@@ -59,5 +59,4 @@ COPY nginx.conf /etc/nginx/nginx.conf
 RUN ln -s /etc/nginx/sites-available/learninglocker.conf /etc/nginx/sites-enabled/learninglocker.conf
 
 RUN pm2 start pm2/all.json
-RUN pm2 restart all
 CMD ["/usr/sbin/init"]
