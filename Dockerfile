@@ -44,10 +44,6 @@ EXPOSE 3000 8080
 
 RUN yarn migrate
 
-#RUN pm2 start pm2/all.json
-#RUN pm2 startup
-#RUN pm2 status
-
 RUN node cli/dist/server createSiteAdmin "example@example.ru" "Example" "Qwerty123"
 
 RUN yum -y install nginx
@@ -58,5 +54,14 @@ COPY learninglocker.conf /etc/nginx/sites-available/learninglocker.conf
 COPY nginx.conf /etc/nginx/nginx.conf
 RUN ln -s /etc/nginx/sites-available/learninglocker.conf /etc/nginx/sites-enabled/learninglocker.conf
 
-#RUN pm2 start pm2/all.json
+RUN yum -y install sudo
+
+RUN adduser docker
+RUN passwd -d docker
+RUN usermod -aG wheel docker
+
+USER docker
+
+CMD /bin/bash pm2 start pm2/all.json
+
 CMD ["/usr/sbin/init"]

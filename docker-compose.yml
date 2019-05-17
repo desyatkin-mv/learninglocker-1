@@ -1,6 +1,7 @@
 version: '3'
 services:
   learninglocker:
+    container_name: learninglocker
     build: .
     image: centos:latest
     ports:
